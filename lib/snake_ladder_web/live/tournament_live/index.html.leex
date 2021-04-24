@@ -1,0 +1,13 @@
+<div class="tournament">
+  <%= if @game_started do %>
+    <%= live_component(@socket, SnakeLadderWeb.Game, id: @token, players: @players) %>
+  <% else %>
+    <div class="row">
+      <div class="notice column column-30">
+        <p> Waiting for Player 2 </p>
+        <p>Copy and share the url</p>
+        <input type="text" value="https://test.herokuapp.com?t=ETD">
+      </div>
+    </div>
+  <% end %>
+</div>

@@ -1,0 +1,42 @@
+<div class="game row">
+  <div class="board-wrapper column column-60">
+    <div id="overlay"></div>
+    <table id='board' border="1px">
+      <%= for row <- @board_matrix do %>
+        <tr>
+          <%= for col <- row do %>
+            <td class="slot <%= if rem(col,2) == 0, do: 'slot-yellow', else: 'slot-white' %>"> <%= col %> </td>
+          <% end %>
+        </tr>
+      <% end %>
+    </table>
+  </div>
+
+  <div class="sidebar column column-25">
+    <div class="row">
+      <div class="column players">
+        <div class="row">
+          <%= for player <- @players do %>
+            <div class="player column column-50">
+              <div class="<%= player %>-img"></div>
+              <div class="player-name"><%= player %></div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="column dice-wrapper">
+        <div class="row">
+          <div class="dice-result">
+          </div>
+        </div>
+        <div class="row">
+          <div class="dice">
+            <button>Roll</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
