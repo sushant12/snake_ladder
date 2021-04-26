@@ -77,12 +77,51 @@ html {
   background-image: url("/images/sidebar-background.jpg");
   background-repeat: no-repeat;
 }
-
+.circle{
+  position: absolute;
+  // top: 4px;
+  // left: -5px;
+}
 .player-name{
   font-weight: bold;
   color: black;
   text-transform: capitalize;
+  margin-top: 20px;
+  margin-left: 15px;
 }
+
+.pig {
+  width: 50px;
+  height: 50px;
+  background: url('/images/pig.png');
+  animation: pig 2s steps(4) infinite;
+}
+
+@keyframes pig {
+  100% {background-position: -209px;}
+}
+
+.lupid {
+  width: 50px;
+  height: 50px;
+  background: url('/images/lupid.png');
+  animation: monkey 2s steps(10) infinite;
+}
+
+@keyframes monkey {
+  100% {background-position: -498px;}
+}
+
+td {
+  position: relative;
+}
+.player1, .player2{
+  position: absolute;
+  bottom: 5px;
+  left: 2px;
+  z-index: 4;
+}
+
 .player1-img {
   background-image: url("/images/lupid1.png");
   background-position: center;

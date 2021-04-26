@@ -5,7 +5,11 @@
       <%= for row <- @board_matrix do %>
         <tr>
           <%= for col <- row do %>
-            <td class="slot <%= if rem(col,2) == 0, do: 'slot-yellow', else: 'slot-white' %>"> <%= col %> </td>
+            <td class="slot <%= if rem(col,2) == 0, do: 'slot-yellow', else: 'slot-white' %>">
+              <%= col %>
+              <%= if @players.player1.position == col do %><div class="player1 lupid"></div> <% end %>
+              <%= if @players.player2.position == col do %> <div class="player2 pig"></div> <% end %>
+            </td>
           <% end %>
         </tr>
       <% end %>
@@ -16,10 +20,14 @@
     <div class="row">
       <div class="column players">
         <div class="row">
-          <%= for player <- @players do %>
+          <%= for {k,player} <- @players do %>
             <div class="player column column-50">
-              <div class="<%= player %>-img"></div>
-              <div class="player-name"><%= player %></div>
+              <div class="<%= k %>-img">
+                <%= if Atom.to_string(k) == @current_turn do %>
+                  <%= img_tag(Routes.static_path(@socket, "/images/circle.png"), class: "circle") %>
+                <% end %>
+              </div>
+              <div class="player-name"><%= player.name %></div>
             </div>
           <% end %>
         </div>
@@ -29,11 +37,14 @@
       <div class="column dice-wrapper">
         <div class="row">
           <div class="dice-result">
+            <%= @dice %>
           </div>
         </div>
         <div class="row">
           <div class="dice">
-            <button>Roll</button>
+            <%= if @current_turn == @current_player do %>
+              <button phx-click='roll' phx-target="<%= @myself%>">Roll</button>
+            <% end %>
           </div>
         </div>
       </div>

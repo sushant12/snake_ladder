@@ -2,24 +2,28 @@ defmodule SnakeLadderWeb.TournamentLive.Index do
   use SnakeLadderWeb, :live_view
 
   alias SnakeLadderWeb.Presence
-
   @impl true
-  def mount(%{"t" => token, "foreman" => "true"}, _assigns, socket) do
+  def mount(%{"t" => token} = params, _assigns, socket) do
+    presence_id = if Map.get(params, "foreman") == "true", do: "player1", else: "player2"
+
     if connected?(socket) do
       SnakeLadderWeb.Endpoint.subscribe(token)
-      Presence.track(self(), token, "player1", %{})
+      Presence.track(self(), token, presence_id, %{})
     end
 
-    {:ok, socket |> assign(token: token, game_started: false)}
-  end
-
-  def mount(%{"t" => token}, _assigns, socket) do
-    if connected?(socket) do
-      SnakeLadderWeb.Endpoint.subscribe(token)
-      Presence.track(self(), token, "player2", %{})
-    end
-
-    {:ok, socket |> assign(token: token, game_started: false)}
+    {:ok,
+     socket
+     |> assign(
+       players: %{
+         player1: %{name: "Player 1", position: 1, won: false, turn: false},
+         player2: %{name: "Player 2", position: 1, won: false, turn: false}
+       },
+       dice: "",
+       current_turn: "player1",
+       current_player: presence_id,
+       token: token,
+       game_started: false
+     )}
   end
 
   def mount(_params, _assigns, socket) do
@@ -33,14 +37,18 @@ defmodule SnakeLadderWeb.TournamentLive.Index do
 
   @impl true
   def handle_info(%{event: "presence_diff"}, socket) do
-    presence = Presence.list(socket.assigns.token)
-    user_count = presence |> map_size()
-    players = presence |> Map.keys()
+    user_count = Presence.list(socket.assigns.token) |> map_size()
 
     if user_count == 2 do
-      {:noreply, socket |> assign(game_started: true, players: players)}
+      # players = Map.update(socket.assigns.players, :player1, false, &%{&1 | turn: true})
+      {:noreply, socket |> assign(game_started: true)}
     else
-      {:noreply, socket |> assign(players: players)}
+      {:noreply, socket}
     end
+  end
+
+  def handle_info(%{event: "abcs", payload: state}, socket) do
+    {:noreply,
+     assign(socket, players: state.players, dice: state.dice, current_turn: state.current_turn)}
   end
 end

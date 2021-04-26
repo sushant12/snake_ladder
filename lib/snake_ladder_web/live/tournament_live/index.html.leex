@@ -1,6 +1,6 @@
 <div class="tournament">
   <%= if @game_started do %>
-    <%= live_component(@socket, SnakeLadderWeb.Game, id: @token, players: @players) %>
+    <%= live_component(@socket, SnakeLadderWeb.Game, id: @token, token: @token, players: @players, dice: @dice, current_player: @current_player, current_turn: @current_turn) %>
   <% else %>
     <div class="row">
       <div class="notice column column-30">
