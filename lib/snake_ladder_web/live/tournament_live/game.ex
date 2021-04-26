@@ -1,8 +1,6 @@
 defmodule SnakeLadderWeb.Game do
   use SnakeLadderWeb, :live_component
 
-  # alias SnakeLadderWeb.Presence
-
   @impl true
   def update(assigns, socket) do
     board_matrix =
@@ -19,14 +17,7 @@ defmodule SnakeLadderWeb.Game do
 
     {:ok,
      socket
-     |> assign(
-       token: assigns.token,
-       players: assigns.players,
-       board_matrix: board_matrix,
-       dice: assigns.dice,
-       current_player: assigns.current_player,
-       current_turn: assigns.current_turn
-     )}
+     |> assign(Map.put(assigns, :board_matrix, board_matrix))}
   end
 
   @impl true
@@ -45,12 +36,12 @@ defmodule SnakeLadderWeb.Game do
     players =
       Map.update(
         socket.assigns.players,
-        :"#{current_player}",
+        current_player,
         1,
-        &%{&1 | position: sus(&1.position + dice)}
+        &%{&1 | position: pain_or_pleasure(&1.position + dice)}
       )
 
-    SnakeLadderWeb.Endpoint.broadcast!(socket.assigns.token, "abcs", %{
+    SnakeLadderWeb.Endpoint.broadcast!(socket.assigns.topic, "roll", %{
       players: players,
       dice: dice,
       current_turn: current_turn
@@ -59,26 +50,23 @@ defmodule SnakeLadderWeb.Game do
     {:noreply, socket}
   end
 
-  # @impl true
-  # def handle_info(%{event: "abc"}, socket) do
-  #   {:noreply, push_event(socket, "video_played", %{})}
-  # end
-
-  defp sus(2), do: 8
-  defp sus(4), do: 14
-  defp sus(9), do: 31
-  defp sus(13), do: 27
-  defp sus(20), do: 38
-  defp sus(29), do: 11
-  defp sus(40), do: 59
-  defp sus(51), do: 67
-  defp sus(54), do: 34
-  defp sus(62), do: 12
-  defp sus(63), do: 81
-  defp sus(64), do: 43
-  defp sus(71), do: 91
-  defp sus(93), do: 73
-  defp sus(95), do: 75
-  defp sus(99), do: 78
-  defp sus(num), do: num
+  defp pain_or_pleasure(2), do: 18
+  defp pain_or_pleasure(4), do: 14
+  defp pain_or_pleasure(9), do: 31
+  defp pain_or_pleasure(13), do: 27
+  defp pain_or_pleasure(17), do: 7
+  defp pain_or_pleasure(20), do: 38
+  defp pain_or_pleasure(28), do: 84
+  defp pain_or_pleasure(29), do: 11
+  defp pain_or_pleasure(40), do: 59
+  defp pain_or_pleasure(51), do: 67
+  defp pain_or_pleasure(54), do: 34
+  defp pain_or_pleasure(62), do: 21
+  defp pain_or_pleasure(63), do: 81
+  defp pain_or_pleasure(64), do: 43
+  defp pain_or_pleasure(71), do: 91
+  defp pain_or_pleasure(93), do: 73
+  defp pain_or_pleasure(95), do: 75
+  defp pain_or_pleasure(99), do: 78
+  defp pain_or_pleasure(num), do: num
 end

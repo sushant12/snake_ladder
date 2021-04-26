@@ -7,8 +7,8 @@
           <%= for col <- row do %>
             <td class="slot <%= if rem(col,2) == 0, do: 'slot-yellow', else: 'slot-white' %>">
               <%= col %>
-              <%= if @players.player1.position == col do %><div class="player1 lupid"></div> <% end %>
-              <%= if @players.player2.position == col do %> <div class="player2 pig"></div> <% end %>
+              <%= if @players["player1"].position == col do %><div class="player1 lupid"></div> <% end %>
+              <%= if @players["player2"].position == col do %> <div class="player2 pig"></div> <% end %>
             </td>
           <% end %>
         </tr>
@@ -23,7 +23,7 @@
           <%= for {k,player} <- @players do %>
             <div class="player column column-50">
               <div class="<%= k %>-img">
-                <%= if Atom.to_string(k) == @current_turn do %>
+                <%= if k == @current_turn do %>
                   <%= img_tag(Routes.static_path(@socket, "/images/circle.png"), class: "circle") %>
                 <% end %>
               </div>
