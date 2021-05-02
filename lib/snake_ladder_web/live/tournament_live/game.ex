@@ -38,7 +38,7 @@ defmodule SnakeLadderWeb.Game do
         socket.assigns.players,
         current_player,
         1,
-        &%{&1 | position: pain_or_pleasure(&1.position + dice)}
+        &%{&1 | position: pain_or_pleasure(&1.position + dice, &1.position)}
       )
 
     SnakeLadderWeb.Endpoint.broadcast!(socket.assigns.topic, "roll", %{
@@ -48,6 +48,14 @@ defmodule SnakeLadderWeb.Game do
     })
 
     {:noreply, socket}
+  end
+
+  defp pain_or_pleasure(new_position, curr_position) when new_position > 100 do
+    curr_position
+  end
+
+  defp pain_or_pleasure(new_position, _curr_position) when new_position <= 100 do
+    pain_or_pleasure(new_position)
   end
 
   defp pain_or_pleasure(2), do: 18
@@ -68,5 +76,6 @@ defmodule SnakeLadderWeb.Game do
   defp pain_or_pleasure(93), do: 73
   defp pain_or_pleasure(95), do: 75
   defp pain_or_pleasure(99), do: 78
+
   defp pain_or_pleasure(num), do: num
 end
