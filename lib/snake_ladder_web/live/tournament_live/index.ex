@@ -1,35 +1,28 @@
 defmodule SnakeLadderWeb.TournamentLive.Index do
   use SnakeLadderWeb, :live_view
 
-  alias SnakeLadderWeb.Presence
+  alias SnakeLadder.Player
+  alias SnakeLadder.GameServer
 
   @impl true
-  def mount(%{"t" => topic} = params, _assigns, socket) do
-    player = if Map.get(params, "foreman") == "true", do: "player1", else: "player2"
+  def mount(%{"t" => token} = params, _assigns, socket) do
+    player_name = if Map.get(params, "foreman") == "true", do: "player1", else: "player2"
+    player = Player.new(player_name)
+    GameServer.add_player(token, player)
+
+    {:ok, game} = GameServer.get_game(token)
+    if player.name == "player1", do: GameServer.add_current_call(game.token, player)
 
     if connected?(socket) do
-      SnakeLadderWeb.Endpoint.subscribe(topic)
-      Presence.track(self(), topic, player, %{})
+      SnakeLadderWeb.Endpoint.subscribe(token)
     end
 
-    {:ok,
-     socket
-     |> assign(
-       players: %{
-         "player1" => %{name: "Player 1", position: 1},
-         "player2" => %{name: "Player 2", position: 1}
-       },
-       dice: "",
-       current_player: player,
-       topic: topic,
-       current_turn: "player1",
-       game_started: false
-     )}
+    {:ok, socket |> assign(game: game, player: player)}
   end
 
   def mount(_params, _assigns, socket) do
-    token = :crypto.strong_rand_bytes(5) |> Base.url_encode64() |> binary_part(0, 5)
-
+    token = SnakeLadder.Utils.random_short_id()
+    SnakeLadder.GameSupervisor.start_game(token)
     {:ok,
      push_redirect(socket,
        to: Routes.tournament_index_path(socket, :index, t: token, foreman: true)
@@ -37,17 +30,40 @@ defmodule SnakeLadderWeb.TournamentLive.Index do
   end
 
   @impl true
-  def handle_info(%{event: "presence_diff"}, socket) do
-    user_count = Presence.list(socket.assigns.topic) |> map_size()
-
-    if user_count == 2 do
-      {:noreply, socket |> assign(game_started: true)}
-    else
-      {:noreply, socket}
-    end
+  def handle_info(%{event: "player_added", payload: players}, socket) do
+    game = socket.assigns.game
+    {:noreply, assign(socket, game: %{game | players: players})}
   end
 
-  def handle_info(%{event: "roll", payload: state}, socket) do
-    {:noreply, assign(socket, state)}
+  def handle_info(%{event: "dice_rolled", payload: game}, socket) do
+    {:noreply, assign(socket, game: game)}
   end
+
+  @impl true
+  def render(assigns) do
+    ~L"""
+    <div class="tournament">
+      <%= if length(@game.players) == 2 do %>
+        <%= live_component(@socket, SnakeLadderWeb.Game,
+          id: :game,
+          game: @game,
+          player: @player
+          ) %>
+      <% else %>
+        <div class="row">
+          <div class="notice column column-30">
+            <%= if length(@game.players) == 1 do %>
+              <p>Copy and share the url </p>
+              <p>with your friend </p>
+            <% else %>
+              <p>Preparing the Game... </p>
+            <% end %>
+            <input type="text" value="<%= SnakeLadderWeb.Endpoint.url() %>/?t=<%= @game.token %>">
+          </div>
+        </div>
+      <% end %>
+    </div>
+    """
+  end
+
 end

@@ -7,8 +7,6 @@ defmodule SnakeLadder.Application do
 
   def start(_type, _args) do
     children = [
-      # Start the Ecto repository
-      SnakeLadder.Repo,
       # Start the Telemetry supervisor
       SnakeLadderWeb.Telemetry,
       # Start the PubSub system
@@ -17,7 +15,9 @@ defmodule SnakeLadder.Application do
       SnakeLadderWeb.Endpoint,
       # Start a worker by calling: SnakeLadder.Worker.start_link(arg)
       # {SnakeLadder.Worker, arg}
-      SnakeLadderWeb.Presence
+      SnakeLadderWeb.Presence,
+      {Registry, keys: :unique, name: SnakeLadder.GameRegistry},
+      SnakeLadder.GameSupervisor
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
