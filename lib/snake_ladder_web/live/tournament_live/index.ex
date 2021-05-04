@@ -1,24 +1,23 @@
 defmodule SnakeLadderWeb.TournamentLive.Index do
   use SnakeLadderWeb, :live_view
 
-  # alias SnakeLadderWeb.Presence
   alias SnakeLadder.Player
   alias SnakeLadder.GameServer
 
   @impl true
   def mount(%{"t" => token} = params, _assigns, socket) do
-    player = if Map.get(params, "foreman") == "true", do: "player1", else: "player2"
-    plyr = Player.new(player)
-    {:ok, game} = GameServer.get_game(token)
+    player_name = if Map.get(params, "foreman") == "true", do: "player1", else: "player2"
+    player = Player.new(player_name)
+    GameServer.add_player(token, player)
 
-    GameServer.add_player(token, plyr)
+    {:ok, game} = GameServer.get_game(token)
+    if player.name == "player1", do: GameServer.add_current_call(game.token, player)
+
     if connected?(socket) do
       SnakeLadderWeb.Endpoint.subscribe(token)
-      # Presence.track(self(), token, player, %{})
     end
 
-    {:ok,
-     socket |> assign(game: game, player: plyr)}
+    {:ok, socket |> assign(game: game, player: player)}
   end
 
   def mount(_params, _assigns, socket) do
@@ -31,12 +30,13 @@ defmodule SnakeLadderWeb.TournamentLive.Index do
   end
 
   @impl true
-  def handle_info(%{event: "roll", payload: state}, socket) do
-    {:noreply, assign(socket, state)}
+  def handle_info(%{event: "player_added", payload: players}, socket) do
+    game = socket.assigns.game
+    {:noreply, assign(socket, game: %{game | players: players})}
   end
 
-  def handle_info(%{event: "player_added", payload: players}, socket) do
-    {:noreply,  assign(socket, game: %{socket.assigns.game | players: players})}
+  def handle_info(%{event: "dice_rolled", payload: game}, socket) do
+    {:noreply, assign(socket, game: game)}
   end
 
   @impl true
