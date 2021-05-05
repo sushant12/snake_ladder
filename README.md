@@ -1,6 +1,6 @@
 # SnakeLadder
 
-A 2P snake and ladder game build on top of phoenix liveview.
+A 2P snake and ladder game build on top of phoenix liveview. The assets I have used in this repo is from https://github.com/matthewfrancisong/project-1
 
 # Demo
 
